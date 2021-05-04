@@ -1,0 +1,71 @@
+
+module( "Resources", package.seeall )
+
+BaseGamemode = GM.FolderName
+
+local function GetFileList( strDirectory )
+	
+	local files = {}
+
+	//local realDirectory = "gamemodes/" .. BaseGamemode .. "/content/" .. strDirectory .. "/*"
+	local realDirectory = strDirectory .. "/*"
+	local findFiles, findFolders = file.Find( realDirectory, "MOD" )
+
+	for k, v in pairs( table.Add(findFiles, findFolders) ) do
+	
+		if ( v == "." || v == ".." || v == ".svn" ) then continue end
+		
+		table.insert( files, v )
+		
+	end
+	
+	return files
+	
+end
+
+local function Add( strDirectory, strFile )
+	
+	local realFile = strDirectory .. "/" .. strFile
+
+	resource.AddSingleFile( realFile )
+	
+end
+
+local function IsResource( strFile )
+	local fileExt = string.sub( strFile, -4 )
+	return ( fileExt == ".vmt" or
+			 fileExt == ".vtf" or
+			 fileExt == ".mdl" or
+			 fileExt == ".vtx" or
+			 fileExt == ".phy" or
+			 fileExt == ".vvd" or
+			 fileExt == ".png" or
+			 fileExt == ".wav")
+end
+
+local function IsDirectory( strDir )
+	return ( string.GetExtensionFromFilename( strDir ) == nil )
+end
+
+function AddResources( strDirectory )
+	
+	local fileList = GetFileList( strDirectory )
+
+	for k, v in pairs( fileList ) do
+	
+		if ( IsResource( v ) ) then
+		
+			Add( strDirectory, v )
+			
+		else
+
+			local strNextDir = strDirectory .. "/" .. v
+			
+			if IsDirectory( strNextDir ) then
+				AddResources( strNextDir ) // go deeper. BWOOOOOONG!!
+			end
+			
+		end
+	end
+	
+end
